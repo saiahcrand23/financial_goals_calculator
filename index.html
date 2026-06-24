@@ -456,7 +456,7 @@ function calculate(){
   const totalSavingsApplied=loanData.reduce((s,l)=>s+Math.min(l.savings,l.balance),0);
 
   let loanPhaseEnd=null, loanMonthCount=0;
-  let emergPhaseEnd=null, emergMonthCount=0, emergInterest=0, emergReachedBal=0;
+  let emergPhaseEnd=null, emergMonthCount=0, emergInterest=0, emergReachedBal=0, emergExcess=0;
   let houseInterest=0, houseMonthCount=0, houseFinalBal=0, houseFinalDate=null, houseGoalDate=null, houseGoalMonthCount=0, houseGoalBal=0;
   let emergDone=!emergGoal;
   let loansDone=!loansOn || loanData.every(l=>l.balance<=0); // skip if loans disabled
@@ -514,6 +514,8 @@ function calculate(){
         emergDone=true;
         emergPhaseEnd=fmtDate(cur);
         emergReachedBal=hysaBal;
+        emergExcess=hysaBal-emergGoal;
+        hysaBal=emergExcess;
       }
     }
 
@@ -601,20 +603,20 @@ function calculate(){
       <div class="stat-row">
         <div class="stat"><div class="stat-val">$${fmt(hitIt?houseGoalBal:houseFinalBal)}</div><div class="stat-lbl">Balance when goal hit</div></div>
         <div class="stat"><div class="stat-val">$${fmt(houseInterest)}</div><div class="stat-lbl">HYSA interest earned</div></div>
-        ${showEmerg?`<div class="stat"><div class="stat-val">$${fmt(emergReachedBal)}</div><div class="stat-lbl">Carried from Goal ${emergGn}</div></div>`:''}
+        ${showEmerg&&emergExcess>0?`<div class="stat"><div class="stat-val">$${fmt(emergExcess)}</div><div class="stat-lbl">Excess from E-Fund</div></div>`:''}
         <div class="stat"><div class="stat-val">$${fmt(emergInterest+houseInterest)}</div><div class="stat-lbl">Total HYSA interest</div></div>
       </div>
     </div>`;
   } else {
     // No target — show accumulated balance
-    const g3bal  = houseFinalBal>0 ? houseFinalBal : (showEmerg?emergReachedBal:hysaBal);
+    const g3bal  = houseFinalBal>0 ? houseFinalBal : hysaBal;
     const g3date = houseFinalDate  || (showEmerg?emergPhaseEnd:loanPhaseEnd);
     html+=`<div class="phase-block phase-house">
       <p class="phase-title pt-house">&#8962; Goal ${houseGn} — House Down Payment</p>
       <p class="phase-date">$${fmt(g3bal)}</p>
       <p class="phase-sub">HYSA balance as of ${g3date} · ${houseMonthCount} month${houseMonthCount===1?'':'s'} of saving</p>
       <div class="stat-row">
-        ${showEmerg?`<div class="stat"><div class="stat-val">$${fmt(emergReachedBal)}</div><div class="stat-lbl">Carried from Goal ${emergGn}</div></div>`:''}
+        ${showEmerg&&emergExcess>0?`<div class="stat"><div class="stat-val">$${fmt(emergExcess)}</div><div class="stat-lbl">Excess from E-Fund</div></div>`:''}
         <div class="stat"><div class="stat-val">$${fmt(houseInterest)}</div><div class="stat-lbl">HYSA interest earned</div></div>
         <div class="stat"><div class="stat-val">$${fmt(emergInterest+houseInterest)}</div><div class="stat-lbl">Total HYSA interest</div></div>
       </div>
