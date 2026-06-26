@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Financial Goals Calculator 2.0</title>
+<title>Financial Goals Calculator</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#F8F8F6;color:#18181B;min-height:100vh;padding:2rem 1rem}
@@ -79,7 +79,7 @@ input:checked+.slider:before{transform:translateX(16px)}
 <div class="container">
   <div class="app-header">
     <h1>Financial Goals Calculator</h1>
-    <p>Set your goals, plan your contributions, and see your full financial timeline.</p>
+    <p>Set your goals, plan your contributions, and see your full financial timeline. · <button onclick="clearSaved()" style="background:none;border:none;color:#94A3B8;cursor:pointer;font-size:13px;padding:0;text-decoration:underline">Clear saved data</button></p>
   </div>
 
   <!-- LOANS -->
@@ -88,7 +88,7 @@ input:checked+.slider:before{transform:translateX(16px)}
       <span class="section-label" id="loan-section-label">Goal 1 — Loans</span>
       <div style="display:flex;align-items:center;gap:8px">
         <label class="toggle" title="Toggle loans goal">
-          <input type="checkbox" id="loansEnabled" checked onchange="toggleGoalNumbers()">
+          <input type="checkbox" id="loansEnabled" checked onchange="toggleGoalNumbers();saveState()">
           <span class="slider"></span>
         </label>
         <button class="section-add-btn" onclick="addLoan()">+ Add loan</button>
@@ -116,16 +116,21 @@ input:checked+.slider:before{transform:translateX(16px)}
   <!-- EMERGENCY FUND -->
   <div class="section-wrap">
     <div class="section-head">
-      <span class="section-label" id="emerg-section-label">Goal 2 — Emergency Fund</span>
+      <span class="section-label" id="emerg-section-label">Emergency Fund (disabled)</span>
+      <label class="toggle" title="Toggle emergency fund goal">
+        <input type="checkbox" id="emergEnabled" onchange="toggleGoalNumbers();saveState()">
+        <span class="slider"></span>
+      </label>
     </div>
-    <div class="item-card goal-card">
-      <div class="input-grid g-2">
-        <div class="field">
-          <label>Emergency fund target ($)</label>
-          <input type="number" id="emergGoal" placeholder="e.g. 25000" step="100" min="0" class="inp">
+    <div id="emerg-enabled-wrap" style="display:none">
+      <div class="item-card goal-card">
+        <div class="input-grid g-2">
+          <div class="field">
+            <label>Emergency fund target ($)</label>
+            <input type="number" id="emergGoal" placeholder="e.g. 25000" step="100" min="0" class="inp" oninput="saveState()">
+          </div>
         </div>
       </div>
-      <p class="hint">Leave blank to skip the emergency fund goal and go straight to the down payment phase.</p>
     </div>
   </div>
 
@@ -139,7 +144,7 @@ input:checked+.slider:before{transform:translateX(16px)}
     <div class="item-card goal-card">
       <div class="toggle-row">
         <label class="toggle">
-          <input type="checkbox" id="hysaEnabled" onchange="toggleHysa()">
+          <input type="checkbox" id="hysaEnabled" onchange="toggleHysa();saveState()">
           <span class="slider"></span>
         </label>
         <div>
@@ -151,7 +156,7 @@ input:checked+.slider:before{transform:translateX(16px)}
         <div class="input-grid g-2">
           <div class="field">
             <label>HYSA APY (%)</label>
-            <input type="number" id="apy" placeholder="e.g. 4.5" step="0.01" min="0" class="inp">
+            <input type="number" id="apy" placeholder="e.g. 4.5" step="0.01" min="0" class="inp" oninput="saveState()">
           </div>
         </div>
         <p class="hint">Interest compounds daily and is credited on the last day of each month.</p>
@@ -164,16 +169,22 @@ input:checked+.slider:before{transform:translateX(16px)}
   <!-- HOUSE DOWN PAYMENT -->
   <div class="section-wrap">
     <div class="section-head">
-      <span class="section-label" id="house-section-label">Goal 3 — House Down Payment</span>
+      <span class="section-label" id="house-section-label">House Down Payment (disabled)</span>
+      <label class="toggle" title="Toggle house down payment goal">
+        <input type="checkbox" id="houseEnabled" onchange="toggleGoalNumbers();saveState()">
+        <span class="slider"></span>
+      </label>
     </div>
-    <div class="item-card goal-card">
-      <div class="input-grid g-2">
-        <div class="field">
-          <label>Savings target ($) <span style="font-weight:400;color:#94A3B8">(optional)</span></label>
-          <input type="number" id="houseGoal" placeholder="e.g. 60000" step="100" min="0" class="inp">
+    <div id="house-enabled-wrap" style="display:none">
+      <div class="item-card goal-card">
+        <div class="input-grid g-2">
+          <div class="field">
+            <label>Savings target ($) <span style="font-weight:400;color:#94A3B8">(optional)</span></label>
+            <input type="number" id="houseGoal" placeholder="e.g. 60000" step="100" min="0" class="inp" oninput="saveState()">
+          </div>
         </div>
+        <p class="hint">If you enter a target, the result will show when you reach it. Leave blank to simply track how much you've accumulated through your last contribution.</p>
       </div>
-      <p class="hint">If you enter a target, the result will show when you reach it. Leave blank to simply track how much you've accumulated through your last contribution.</p>
     </div>
   </div>
 
@@ -219,32 +230,34 @@ function toggleHysa(){
 // ── Dynamic goal numbering ──────────────────────────────────────────
 function toggleGoalNumbers(){
   const loansOn = document.getElementById('loansEnabled').checked;
+  const emergOn = document.getElementById('emergEnabled').checked;
+  const houseOn = document.getElementById('houseEnabled').checked;
   document.getElementById('loans-enabled-wrap').style.display = loansOn ? 'block' : 'none';
+  document.getElementById('emerg-enabled-wrap').style.display = emergOn ? 'block' : 'none';
+  document.getElementById('house-enabled-wrap').style.display = houseOn ? 'block' : 'none';
   updateGoalLabels();
 }
 function updateGoalLabels(){
-  const loansOn  = document.getElementById('loansEnabled').checked;
-  const emergGoal= parseFloat(document.getElementById('emergGoal')?.value)||0;
-  // Loans always G1 if on, else hidden
-  let g=1;
-  if(loansOn){
-    document.getElementById('loan-section-label').textContent=`Goal ${g++} — Loans`;
-  } else {
-    document.getElementById('loan-section-label').textContent='Loans (disabled)';
-  }
-  document.getElementById('emerg-section-label').textContent=`Goal ${g++} — Emergency Fund`;
-  document.getElementById('house-section-label').textContent=`Goal ${g} — House Down Payment`;
+  const loansOn = document.getElementById('loansEnabled').checked;
+  const emergOn = document.getElementById('emergEnabled').checked;
+  const houseOn = document.getElementById('houseEnabled').checked;
+  let g = 1;
+  document.getElementById('loan-section-label').textContent = loansOn ? `Goal ${g++} — Loans` : 'Loans (disabled)';
+  document.getElementById('emerg-section-label').textContent = emergOn ? `Goal ${g++} — Emergency Fund` : 'Emergency Fund (disabled)';
+  document.getElementById('house-section-label').textContent = houseOn ? `Goal ${g} — House Down Payment` : 'House Down Payment (disabled)';
 }
 
 // ── LOAN cards ─────────────────────────────────────────────────────
 function addLoan(){
   loans.push({id:++loanId, bal:'', rate:'', minPay:'', sav:''});
   renderLoans();
+  saveState();
 }
 function removeLoan(id){
-  saveLoanFields(); // persist current values before removing
+  saveLoanFields();
   loans = loans.filter(l=>l.id!==id);
   renderLoans();
+  saveState();
 }
 function saveLoanFields(){
   loans.forEach(l=>{
@@ -272,16 +285,16 @@ function renderLoans(){
         <div class="field"><label>Annual interest rate (%)</label>
           <input type="number" id="l${l.id}_rate" value="${l.rate}" placeholder="e.g. 5.5" step="0.01" min="0" class="inp" oninput="loanField(${l.id},'rate',this.value)"></div>
         <div class="field"><label>Required monthly payment ($)</label>
-          <input type="number" id="l${l.id}_min" value="${l.minPay}" placeholder="e.g. 150" step="0.01" min="0" class="inp" oninput="loanField(${l.id},'minPay',this.value)"></div>
+          <input type="number" id="l${l.id}_min" value="${l.minPay}" placeholder="e.g. 200" step="0.01" min="0" class="inp" oninput="loanField(${l.id},'minPay',this.value)"></div>
         <div class="field"><label>Savings already set aside ($)</label>
-          <input type="number" id="l${l.id}_sav" value="${l.sav}" placeholder="e.g. 671.27" step="0.01" min="0" class="inp" oninput="loanField(${l.id},'sav',this.value)"></div>
+          <input type="number" id="l${l.id}_sav" value="${l.sav}" placeholder="e.g. 500" step="0.01" min="0" class="inp" oninput="loanField(${l.id},'sav',this.value)"></div>
       </div>`;
     el.appendChild(d);
   });
 }
 function loanField(id, key, val){
   const l=loans.find(l=>l.id===id);
-  if(l) l[key]=val;
+  if(l){ l[key]=val; saveState(); }
 }
 
 // ── CONTRIBUTION cards ─────────────────────────────────────────────
@@ -291,11 +304,13 @@ const FREQ_CLASS={monthly:'freq-monthly',biweekly:'freq-biweekly',quarterly:'fre
 function addContrib(){
   contribs.push({id:++contribId, freq:'monthly', amt:'', start:'', end:'', day:''});
   renderContribs();
+  saveState();
 }
 function removeContrib(id){
   saveContribFields();
   contribs = contribs.filter(c=>c.id!==id);
   renderContribs();
+  saveState();
 }
 function saveContribFields(){
   contribs.forEach(c=>{
@@ -307,14 +322,14 @@ function saveContribFields(){
 }
 function contribField(id, key, val){
   const c=contribs.find(c=>c.id===id);
-  if(c) c[key]=val;
+  if(c){ c[key]=val; saveState(); }
 }
 function changeFreq(id, val){
-  // Save all current field values first, then update freq and re-render
   saveContribFields();
   const c=contribs.find(c=>c.id===id);
   if(c){ c.freq=val; }
   renderContribs();
+  saveState();
 }
 
 function renderContribs(){
@@ -334,7 +349,7 @@ function renderContribs(){
       </div>
       <div class="input-grid g-2">
         <div class="field"><label>Amount ($)</label>
-          <input type="number" id="c${c.id}_amt" value="${c.amt}" placeholder="e.g. 3500" step="0.01" min="0" class="inp" oninput="contribField(${c.id},'amt',this.value)"></div>
+          <input type="number" id="c${c.id}_amt" value="${c.amt}" placeholder="e.g. 2000" step="0.01" min="0" class="inp" oninput="contribField(${c.id},'amt',this.value)"></div>
         <div class="field"><label>Frequency</label>
           <select id="c${c.id}_freq" class="inp" onchange="changeFreq(${c.id},this.value)">
             <option value="monthly"   ${freq==='monthly'   ?'selected':''}>Monthly</option>
@@ -406,17 +421,16 @@ function calculate(){
   saveContribFields();
 
   const loansOn   = document.getElementById('loansEnabled').checked;
+  const emergOn   = document.getElementById('emergEnabled').checked;
+  const houseOn   = document.getElementById('houseEnabled').checked;
   const hysaOn    = document.getElementById('hysaEnabled').checked;
   const apy       = hysaOn ? (parseFloat(v('apy'))||0) : 0;
-  const emergGoal = parseFloat(v('emergGoal'))||0;
-  const houseGoal = parseFloat(v('houseGoal'))||0;
+  const emergGoal = emergOn ? (parseFloat(v('emergGoal'))||0) : 0;
+  const houseGoal = houseOn ? (parseFloat(v('houseGoal'))||0) : 0;
 
-  // At least one goal must be active
-  const hasLoans = loansOn && loans.length > 0 && loans.some(l=>parseFloat(l.bal)>0);
-  const hasEmerg = emergGoal > 0;
-  const hasHouse = true; // house phase always runs as final accumulation phase
-  if(!hasLoans && !hasEmerg){
-    resultArea.innerHTML='<div class="warning">Enable at least one goal (Loans or Emergency Fund) to calculate your timeline.</div>'; return;
+  // At least one goal must be enabled
+  if(!loansOn && !emergOn && !houseOn){
+    resultArea.innerHTML='<div class="warning">Enable at least one goal to calculate your timeline.</div>'; return;
   }
   if(!contribs.length){ resultArea.innerHTML='<div class="warning">Add at least one contribution rule.</div>'; return; }
 
@@ -427,8 +441,11 @@ function calculate(){
     savings : parseFloat(l.sav)||0,
   })) : [];
 
-  if(loansOn && loanData.every(l=>l.balance<=0)){
+  if(loansOn && (!loanData.length || loanData.every(l=>l.balance<=0))){
     resultArea.innerHTML='<div class="warning">Enter a balance for at least one loan, or disable the Loans goal.</div>'; return;
+  }
+  if(emergOn && emergGoal <= 0){
+    resultArea.innerHTML='<div class="warning">Enter an emergency fund target, or disable the Emergency Fund goal.</div>'; return;
   }
 
   // Simulation start = earliest contribution start
@@ -458,7 +475,7 @@ function calculate(){
   let loanPhaseEnd=null, loanMonthCount=0;
   let emergPhaseEnd=null, emergMonthCount=0, emergInterest=0, emergReachedBal=0, emergExcess=0;
   let houseInterest=0, houseMonthCount=0, houseFinalBal=0, houseFinalDate=null, houseGoalDate=null, houseGoalMonthCount=0, houseGoalBal=0;
-  let emergDone=!emergGoal;
+  let emergDone=!emergOn || !emergGoal;
   let loansDone=!loansOn || loanData.every(l=>l.balance<=0); // skip if loans disabled
   if(loansDone && !loansOn) loanPhaseEnd=null;
 
@@ -520,7 +537,7 @@ function calculate(){
     }
 
     // ── Phase 3: Down payment ───────────────────────────────────
-    if(loansDone && emergDone){
+    if(loansDone && emergDone && houseOn){
       hysaBal+=cashLeft; cashLeft=0;
       const int=hysaInt(hysaBal,apy,cur.getFullYear(),cur.getMonth());
       hysaBal+=int; houseInterest+=int;
@@ -536,32 +553,40 @@ function calculate(){
 
     monthIdx++;
     cur=addMonths(cur,1);
-    // If house goal is set and hit, stop after that month
-    if(loansDone && emergDone && houseGoal>0 && houseGoalDate) break;
-    if(loansDone && emergDone && cur>lastCashMonth) break;
+    // Stop when all enabled goals are done or contributions exhausted
+    if(loansDone && emergDone){
+      if(houseOn && houseGoal>0 && houseGoalDate) break;
+      if(!houseOn || cur>lastCashMonth) break;
+    }
     if(monthIdx>=MAX) break;
   }
 
   if(loansOn && !loansDone){ resultArea.innerHTML='<div class="warning">Contributions aren\'t enough to pay off the loans within 50 years. Increase contribution amounts or required payments.</div>'; return; }
-  if(emergGoal>0&&!emergDone){ resultArea.innerHTML='<div class="warning">Emergency fund goal not reached within the contribution window. Add more contributions or extend their end dates.</div>'; return; }
+  if(emergOn && emergGoal>0 && !emergDone){ resultArea.innerHTML='<div class="warning">Emergency fund goal not reached within the contribution window. Add more contributions or extend their end dates.</div>'; return; }
 
   // ── Dynamic goal numbering for results ──────────────────────────
   const showLoans=loansOn && loanData.some(l=>l.balance>0);
-  const showEmerg=emergGoal>0;
+  const showEmerg=emergOn && emergGoal>0;
+  const showHouse=houseOn;
   let gn=1;
   const loanGn  = showLoans ? gn++ : null;
-  const emergGn  = showEmerg ? gn++ : null;
-  const houseGn  = gn;
+  const emergGn = showEmerg ? gn++ : null;
+  const houseGn = gn;
 
-  const totalM=(showLoans?loanMonthCount:0)+(showEmerg?emergMonthCount:0)+(houseMonthCount||1);
-  const lp=showLoans?Math.max(2,Math.round(loanMonthCount/totalM*100)):0;
-  const ep=showEmerg?Math.max(2,Math.round(emergMonthCount/totalM*100)):0;
-  const hp=Math.max(2,100-lp-ep);
+  // Build timeline segments
+  const segs=[];
+  if(showLoans) segs.push({cls:'tl-loan',label:'Loan',count:loanMonthCount});
+  if(showEmerg) segs.push({cls:'tl-emerg',label:'E-Fund',count:emergMonthCount});
+  if(showHouse) segs.push({cls:'tl-house',label:'Down Pmt',count:houseMonthCount||1});
+  const totalM=segs.reduce((s,x)=>s+x.count,0)||1;
+  let usedPct=0;
+  segs.forEach((seg,i)=>{
+    seg.pct=i===segs.length-1?Math.max(2,100-usedPct):Math.max(2,Math.round(seg.count/totalM*100));
+    usedPct+=seg.pct;
+  });
 
   let html=`<div class="timeline">
-    ${showLoans?`<div class="tl-seg tl-loan" style="flex:${lp}">Loan<br>${loanMonthCount}mo</div>`:''}
-    ${showEmerg?`<div class="tl-seg tl-emerg" style="flex:${ep}">E-Fund<br>${emergMonthCount}mo</div>`:''}
-    <div class="tl-seg tl-house" style="flex:${hp}">Down Pmt<br>${houseMonthCount}mo</div>
+    ${segs.map(s=>`<div class="tl-seg ${s.cls}" style="flex:${s.pct}">${s.label}<br>${s.count}mo</div>`).join('')}
   </div>`;
 
   if(showLoans){
@@ -591,7 +616,7 @@ function calculate(){
   }
 
   // Goal 3 — two layouts: with target (date-first like G1/G2) vs without (balance-first)
-  if(houseGoal>0){
+  if(showHouse && houseGoal>0){
     const hitIt = !!houseGoalDate;
     html+=`<div class="phase-block phase-house">
       <p class="phase-title pt-house">&#8962; Goal ${houseGn} — $${fmt(houseGoal)} down payment${hitIt?' reached':' (not yet reached)'}</p>
@@ -607,7 +632,7 @@ function calculate(){
         <div class="stat"><div class="stat-val">$${fmt(emergInterest+houseInterest)}</div><div class="stat-lbl">Total HYSA interest</div></div>
       </div>
     </div>`;
-  } else {
+  } else if(showHouse) {
     // No target — show accumulated balance
     const g3bal  = houseFinalBal>0 ? houseFinalBal : hysaBal;
     const g3date = houseFinalDate  || (showEmerg?emergPhaseEnd:loanPhaseEnd);
@@ -627,7 +652,56 @@ function calculate(){
   resultArea.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
+// ── Persistence ────────────────────────────────────────────────────
+const STORAGE_KEY='finCalc_v2';
+
+function saveState(){
+  saveLoanFields();
+  saveContribFields();
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      loans, contribs, loanId, contribId,
+      loansEnabled: document.getElementById('loansEnabled').checked,
+      emergEnabled: document.getElementById('emergEnabled').checked,
+      houseEnabled: document.getElementById('houseEnabled').checked,
+      hysaEnabled:  document.getElementById('hysaEnabled').checked,
+      emergGoal: v('emergGoal'),
+      houseGoal: v('houseGoal'),
+      apy:       v('apy'),
+    }));
+  } catch(e){}
+}
+
+function loadState(){
+  try {
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    const s=JSON.parse(raw);
+    loans     = s.loans     || [];
+    contribs  = s.contribs  || [];
+    loanId    = s.loanId    || 0;
+    contribId = s.contribId || 0;
+    if(s.loansEnabled!==undefined) document.getElementById('loansEnabled').checked=s.loansEnabled;
+    if(s.emergEnabled!==undefined) document.getElementById('emergEnabled').checked=s.emergEnabled;
+    if(s.houseEnabled!==undefined) document.getElementById('houseEnabled').checked=s.houseEnabled;
+    if(s.hysaEnabled !==undefined) document.getElementById('hysaEnabled').checked=s.hysaEnabled;
+    if(s.emergGoal) document.getElementById('emergGoal').value=s.emergGoal;
+    if(s.houseGoal) document.getElementById('houseGoal').value=s.houseGoal;
+    if(s.apy)       document.getElementById('apy').value=s.apy;
+    toggleGoalNumbers();
+    toggleHysa();
+  } catch(e){}
+}
+
+function clearSaved(){
+  if(confirm('Clear all saved data and reset the calculator?')){
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
+  }
+}
+
 // ── Init ───────────────────────────────────────────────────────────
+loadState();
 renderLoans();
 renderContribs();
 updateGoalLabels();
