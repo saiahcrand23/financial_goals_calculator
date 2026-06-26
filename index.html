@@ -5,300 +5,715 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Financial Goals Calculator</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f3; color: #1a1a1a; min-height: 100vh; padding: 2rem 1rem; }
-  .container { max-width: 700px; margin: 0 auto; }
-  h1 { font-size: 22px; font-weight: 500; margin-bottom: 1.5rem; }
-  .card { background: #fff; border: 0.5px solid rgba(0,0,0,0.12); border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1rem; }
-  .setup { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .field label { font-size: 12px; color: #666; display: block; margin-bottom: 4px; }
-  .amount-input { width: 100%; padding: 6px 10px; border: 0.5px solid #bbb; border-radius: 8px; background: #fff; color: #1a1a1a; font-size: 14px; font-family: inherit; }
-  .amount-input:focus { outline: none; border-color: #888; box-shadow: 0 0 0 2px rgba(0,0,0,0.08); }
-  .hl-blue { border-color: #93c5fd !important; background: #eff6ff !important; }
-  .hl-green { border-color: #86efac !important; background: #f0fdf4 !important; }
-  .section-label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: .05em; margin: 0 0 10px; font-weight: 500; }
-  .row-grid { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: center; margin-bottom: 8px; }
-  .month-label { font-size: 13px; color: #666; white-space: nowrap; }
-  .remove-btn { background: none; border: none; cursor: pointer; color: #999; padding: 4px 6px; font-size: 18px; line-height: 1; border-radius: 6px; }
-  .remove-btn:hover { background: #f0f0f0; color: #333; }
-  .add-btn { background: none; border: 0.5px solid #bbb; border-radius: 8px; padding: 7px 14px; cursor: pointer; font-size: 13px; color: #666; display: flex; align-items: center; gap: 6px; margin-bottom: .75rem; font-family: inherit; }
-  .add-btn:hover { background: #f5f5f5; color: #333; }
-  .hint { font-size: 12px; color: #888; }
-  .timeline { display: flex; align-items: stretch; margin-bottom: 1rem; border-radius: 8px; overflow: hidden; border: 0.5px solid #ddd; min-height: 40px; }
-  .tl-seg { display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; padding: 8px 4px; text-align: center; min-width: 2px; }
-  .tl-loan { background: #dbeafe; color: #1e40af; }
-  .tl-emerg { background: #dcfce7; color: #166534; }
-  .tl-house { background: #fef9c3; color: #854d0e; }
-  .phase-block { border-radius: 12px; padding: 1.25rem; text-align: center; margin-bottom: .75rem; }
-  .phase-loan { background: #dbeafe; }
-  .phase-emerg { background: #dcfce7; }
-  .phase-house { background: #fef9c3; }
-  .phase-title { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .06em; margin: 0 0 4px; }
-  .pt-loan { color: #1e40af; }
-  .pt-emerg { color: #166534; }
-  .pt-house { color: #854d0e; }
-  .phase-date { font-size: 20px; font-weight: 500; color: #1a1a1a; margin: 0 0 3px; }
-  .phase-sub { font-size: 13px; color: #555; margin: 0 0 1rem; }
-  .stat-row { display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; }
-  .stat { text-align: center; }
-  .stat-val { font-size: 16px; font-weight: 500; color: #1a1a1a; }
-  .stat-lbl { font-size: 11px; color: #666; }
-  .warning { background: #fef9c3; border: 0.5px solid #fde047; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #854d0e; margin-bottom: .75rem; }
-  @media (max-width: 500px) { .setup { grid-template-columns: 1fr; } .stat-row { gap: 1rem; } }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#F8F8F6;color:#18181B;min-height:100vh;padding:2rem 1rem}
+.container{max-width:740px;margin:0 auto}
+.app-header{margin-bottom:2rem}
+.app-header h1{font-size:26px;font-weight:600;letter-spacing:-0.03em;color:#18181B}
+.app-header p{font-size:13px;color:#64748B;margin-top:4px}
+.section-wrap{margin-bottom:1.25rem}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem}
+.section-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#64748B}
+.section-add-btn{display:flex;align-items:center;gap:5px;background:none;border:1px solid #D1D5DB;border-radius:6px;padding:4px 10px;font-size:12px;color:#64748B;cursor:pointer;font-family:inherit;transition:all .15s}
+.section-add-btn:hover{background:#fff;color:#18181B;border-color:#94A3B8}
+.item-card{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:.9rem 1rem;margin-bottom:.6rem;position:relative;overflow:hidden}
+.item-card.loan-card{border-left:3px solid #93C5FD}
+.item-card.contrib-card{border-left:3px solid #A7F3D0}
+.item-card.goal-card{border-left:3px solid #FCD34D}
+.card-header{display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem}
+.card-title{font-size:13px;font-weight:500;color:#18181B;flex:1}
+.freq-badge{font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;letter-spacing:.03em;white-space:nowrap}
+.freq-monthly{background:#DBEAFE;color:#1E40AF}
+.freq-biweekly{background:#EDE9FE;color:#5B21B6}
+.freq-quarterly{background:#FEF3C7;color:#92400E}
+.freq-annually{background:#FCE7F3;color:#9D174D}
+.freq-oneoff{background:#F1F5F9;color:#475569}
+.remove-card-btn{background:none;border:none;cursor:pointer;color:#CBD5E1;font-size:18px;line-height:1;padding:2px 4px;border-radius:4px;transition:color .15s;flex-shrink:0}
+.remove-card-btn:hover{color:#EF4444}
+.input-grid{display:grid;gap:10px}
+.input-grid>.field{min-width:0}
+.g-2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.g-3{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)}
+.field label{font-size:11px;color:#64748B;display:block;margin-bottom:3px;font-weight:500}
+.inp{width:100%;padding:6px 9px;border:1px solid #D1D5DB;border-radius:7px;background:#F9FAFB;color:#18181B;font-size:13px;font-family:inherit;transition:border .15s}
+.inp:focus{outline:none;border-color:#94A3B8;background:#fff}
+.inp[type=number]{font-variant-numeric:tabular-nums}
+select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:28px}
+.toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:.75rem}
+.toggle-label{font-size:13px;color:#18181B;font-weight:500}
+.toggle-sub{font-size:11px;color:#94A3B8}
+.toggle{position:relative;display:inline-block;width:36px;height:20px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.slider{position:absolute;cursor:pointer;inset:0;background:#D1D5DB;border-radius:20px;transition:.2s}
+.slider:before{position:absolute;content:'';height:14px;width:14px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s}
+input:checked+.slider{background:#18181B}
+input:checked+.slider:before{transform:translateX(16px)}
+.divider{border:none;border-top:1px solid #E5E7EB;margin:1.25rem 0}
+.calc-btn{width:100%;padding:11px;background:#18181B;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;letter-spacing:-.01em;margin-bottom:1.5rem;transition:background .15s}
+.calc-btn:hover{background:#27272A}
+.timeline{display:flex;align-items:stretch;margin-bottom:1rem;border-radius:8px;overflow:hidden;border:1px solid #E5E7EB;min-height:38px}
+.tl-seg{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;padding:8px 4px;text-align:center;min-width:2px;letter-spacing:.02em}
+.tl-loan{background:#DBEAFE;color:#1E40AF}
+.tl-emerg{background:#D1FAE5;color:#065F46}
+.tl-house{background:#FEF3C7;color:#92400E}
+.phase-block{border-radius:12px;padding:1.25rem;text-align:center;margin-bottom:.75rem}
+.phase-loan{background:#DBEAFE}
+.phase-emerg{background:#D1FAE5}
+.phase-house{background:#FEF3C7}
+.phase-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin:0 0 4px}
+.pt-loan{color:#1E40AF}
+.pt-emerg{color:#065F46}
+.pt-house{color:#92400E}
+.phase-date{font-size:22px;font-weight:600;letter-spacing:-.02em;color:#18181B;margin:0 0 3px}
+.phase-sub{font-size:13px;color:#64748B;margin:0 0 1rem}
+.stat-row{display:flex;justify-content:center;gap:1.75rem;flex-wrap:wrap}
+.stat{text-align:center}
+.stat-val{font-size:15px;font-weight:600;color:#18181B;font-variant-numeric:tabular-nums}
+.stat-lbl{font-size:11px;color:#64748B;margin-top:1px}
+.warning{background:#FEF9C3;border:1px solid #FDE047;border-radius:8px;padding:10px 14px;font-size:13px;color:#854D0E;margin-bottom:.75rem}
+.empty-msg{font-size:13px;color:#94A3B8;text-align:center;padding:1rem 0}
+.hint{font-size:11px;color:#94A3B8;margin-top:8px;line-height:1.5}
+@media(max-width:520px){.g-3{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){
+  body{padding:1.25rem .75rem}
+  .item-card{padding:.75rem .875rem}
+  .g-2,.g-3{grid-template-columns:minmax(0,1fr)}
+  .phase-date{font-size:18px}
+  .stat-row{gap:1rem}
+  .stat-val{font-size:14px}
+}
 </style>
 </head>
 <body>
 <div class="container">
-  <h1>Financial Goals Calculator</h1>
+  <div class="app-header">
+    <h1>Financial Goals Calculator</h1>
+    <p>Set your goals, plan your contributions, and see your full financial timeline. · <button onclick="clearSaved()" style="background:none;border:none;color:#94A3B8;cursor:pointer;font-size:13px;padding:0;text-decoration:underline">Clear saved data</button></p>
+  </div>
 
-  <div class="card">
-    <p class="section-label">Loan details</p>
-    <div class="setup">
-      <div class="field">
-        <label>Current balance ($)</label>
-        <input type="number" id="balance" placeholder="e.g. 5000" step="0.01" min="0" class="amount-input" oninput="calculate()">
+  <!-- LOANS -->
+  <div class="section-wrap">
+    <div class="section-head">
+      <span class="section-label" id="loan-section-label">Goal 1 — Loans</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <label class="toggle" title="Toggle loans goal">
+          <input type="checkbox" id="loansEnabled" checked onchange="toggleGoalNumbers();saveState()">
+          <span class="slider"></span>
+        </label>
+        <button class="section-add-btn" onclick="addLoan()">+ Add loan</button>
       </div>
-      <div class="field">
-        <label>Annual interest rate (%)</label>
-        <input type="number" id="loanRate" placeholder="e.g. 5.5" step="0.01" min="0" class="amount-input" oninput="calculate()">
-      </div>
-      <div class="field">
-        <label>Required monthly payment ($)</label>
-        <input type="number" id="minPayment" placeholder="e.g. 150" step="0.01" min="0" class="amount-input hl-blue" oninput="calculate()">
-      </div>
-      <div class="field">
-        <label>Savings already set aside ($)</label>
-        <input type="number" id="savings" value="671.27" step="0.01" min="0" class="amount-input" oninput="calculate()">
-      </div>
-      <div class="field">
-        <label>Start month</label>
-        <input type="month" id="startMonth" class="amount-input" oninput="renderRows()">
+    </div>
+    <div id="loans-enabled-wrap">
+      <div id="loan-list"></div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- CONTRIBUTIONS -->
+  <div class="section-wrap">
+    <div class="section-head">
+      <span class="section-label">Contributions</span>
+      <button class="section-add-btn" onclick="addContrib()">+ Add contribution</button>
+    </div>
+    <p style="font-size:12px;color:#94A3B8;margin-bottom:.75rem">Each rule applies across all goals in sequence. Leftover cash after each goal rolls forward automatically.</p>
+    <div id="contrib-list"></div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- EMERGENCY FUND -->
+  <div class="section-wrap">
+    <div class="section-head">
+      <span class="section-label" id="emerg-section-label">Emergency Fund (disabled)</span>
+      <label class="toggle" title="Toggle emergency fund goal">
+        <input type="checkbox" id="emergEnabled" onchange="toggleGoalNumbers();saveState()">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div id="emerg-enabled-wrap" style="display:none">
+      <div class="item-card goal-card">
+        <div class="input-grid g-2">
+          <div class="field">
+            <label>Emergency fund target ($)</label>
+            <input type="number" id="emergGoal" placeholder="e.g. 25000" step="100" min="0" class="inp" oninput="saveState()">
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="card">
-    <p class="section-label">HYSA — emergency fund &amp; down payment</p>
-    <div class="setup">
-      <div class="field">
-        <label>Emergency fund target ($)</label>
-        <input type="number" id="emergGoal" value="25000" step="100" min="0" class="amount-input hl-green" oninput="calculate()">
+  <hr class="divider">
+
+  <!-- HYSA -->
+  <div class="section-wrap">
+    <div class="section-head">
+      <span class="section-label">High-Yield Savings Account (HYSA)</span>
+    </div>
+    <div class="item-card goal-card">
+      <div class="toggle-row">
+        <label class="toggle">
+          <input type="checkbox" id="hysaEnabled" onchange="toggleHysa();saveState()">
+          <span class="slider"></span>
+        </label>
+        <div>
+          <div class="toggle-label">I have a HYSA</div>
+          <div class="toggle-sub">Enable to add daily-compounding interest to your savings phases</div>
+        </div>
       </div>
-      <div class="field">
-        <label>HYSA APY (%)</label>
-        <input type="number" id="apy" placeholder="e.g. 4.5" step="0.01" min="0" class="amount-input hl-green" oninput="calculate()">
+      <div id="hysa-fields" style="display:none">
+        <div class="input-grid g-2">
+          <div class="field">
+            <label>HYSA APY (%)</label>
+            <input type="number" id="apy" placeholder="e.g. 4.5" step="0.01" min="0" class="inp" oninput="saveState()">
+          </div>
+        </div>
+        <p class="hint">Interest compounds daily and is credited on the last day of each month.</p>
       </div>
     </div>
-    <p class="hint" style="margin-top:8px">Interest compounds daily, credited on the last day of each month. After hitting the emergency fund target, all contributions and interest continue building your down payment.</p>
   </div>
 
-  <div class="card">
-    <p class="section-label">Monthly budget</p>
-    <div id="payment-rows"></div>
-    <button class="add-btn" onclick="addRow()">+ Add another month</button>
-    <p class="hint">Total you can put toward goals each month. During the loan phase, required payment comes first; extra crushes the principal. After payoff, everything flows into the HYSA. Goal 3 shows your running balance for every month you add beyond Goal 2.</p>
+  <hr class="divider">
+
+  <!-- HOUSE DOWN PAYMENT -->
+  <div class="section-wrap">
+    <div class="section-head">
+      <span class="section-label" id="house-section-label">House Down Payment (disabled)</span>
+      <label class="toggle" title="Toggle house down payment goal">
+        <input type="checkbox" id="houseEnabled" onchange="toggleGoalNumbers();saveState()">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div id="house-enabled-wrap" style="display:none">
+      <div class="item-card goal-card">
+        <div class="input-grid g-2">
+          <div class="field">
+            <label>Savings target ($) <span style="font-weight:400;color:#94A3B8">(optional)</span></label>
+            <input type="number" id="houseGoal" placeholder="e.g. 60000" step="100" min="0" class="inp" oninput="saveState()">
+          </div>
+        </div>
+        <p class="hint">If you enter a target, the result will show when you reach it. Leave blank to simply track how much you've accumulated through your last contribution.</p>
+      </div>
+    </div>
   </div>
 
+  <button class="calc-btn" onclick="calculate()">Calculate my timeline</button>
   <div id="result-area"></div>
 </div>
 
 <script>
-let rows = [{id:1,amount:''},{id:2,amount:''}];
-let nextId = 3;
+// ── State — single source of truth for all card data ───────────────
+let loans = [];   // {id, bal, rate, minPay, sav}
+let contribs = []; // {id, freq, amt, start, end, day}
+let loanId = 0;
+let contribId = 0;
 
-function getMonthDate(absIdx){
-  const sm=document.getElementById('startMonth').value;
-  const [y,m]=sm?sm.split('-').map(Number):[new Date().getFullYear(),new Date().getMonth()+2];
-  return new Date(y,m-1+absIdx,1);
-}
-function fmtDate(d){return d.toLocaleString('default',{month:'long',year:'numeric'});}
-function getMonthLabel(idx){return fmtDate(getMonthDate(idx));}
-function daysInMonth(y,m){return new Date(y,m+1,0).getDate();}
+// ── Generic helpers ────────────────────────────────────────────────
+function v(id){ const el=document.getElementById(id); return el?el.value:''; }
+function fmt(n){ return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function daysInMonth(y,m){ return new Date(y,m+1,0).getDate(); }
 function hysaInt(bal,apy,y,m){
-  if(!apy||bal<=0)return 0;
-  return bal*(Math.pow(1+apy/100/365,daysInMonth(y,m))-1);
+  if(!apy||bal<=0) return 0;
+  return bal*(Math.pow(1+apy/100/365, daysInMonth(y,m))-1);
 }
-function fmt(n){return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
-function getBudget(absIdx){
-  const b=rows.map(r=>parseFloat(r.amount)||0);
-  return absIdx<b.length?b[absIdx]:b[b.length-1]||0;
+function parseYM(str){ // "YYYY-MM" → Date at first of month
+  if(!str) return null;
+  const [y,m]=str.split('-').map(Number);
+  return new Date(y,m-1,1);
+}
+function parseYMD(str){ // "YYYY-MM-DD" → Date
+  if(!str) return null;
+  const [y,m,d]=str.split('-').map(Number);
+  return new Date(y,m-1,d);
+}
+function fmtDate(d){ return d.toLocaleString('default',{month:'long',year:'numeric'}); }
+function monthKey(d){ return d.getFullYear()*12+d.getMonth(); }
+function addMonths(d,n){ return new Date(d.getFullYear(),d.getMonth()+n,1); }
+
+// ── HYSA toggle ────────────────────────────────────────────────────
+function toggleHysa(){
+  const on = document.getElementById('hysaEnabled').checked;
+  document.getElementById('hysa-fields').style.display = on ? 'block' : 'none';
 }
 
-function renderRows(){
-  const c=document.getElementById('payment-rows');
-  c.innerHTML='';
-  rows.forEach((row,idx)=>{
-    const div=document.createElement('div');
-    div.className='row-grid';
-    div.innerHTML=`
-      <span class="month-label">${getMonthLabel(idx)}</span>
-      <input type="number" class="amount-input" placeholder="$0 total budget" value="${row.amount}" min="0" step="0.01" oninput="updateRow(${row.id},this.value)"/>
-      <button class="remove-btn" onclick="removeRow(${row.id})" aria-label="Remove month ${idx+1}">&times;</button>`;
-    c.appendChild(div);
+// ── Dynamic goal numbering ──────────────────────────────────────────
+function toggleGoalNumbers(){
+  const loansOn = document.getElementById('loansEnabled').checked;
+  const emergOn = document.getElementById('emergEnabled').checked;
+  const houseOn = document.getElementById('houseEnabled').checked;
+  document.getElementById('loans-enabled-wrap').style.display = loansOn ? 'block' : 'none';
+  document.getElementById('emerg-enabled-wrap').style.display = emergOn ? 'block' : 'none';
+  document.getElementById('house-enabled-wrap').style.display = houseOn ? 'block' : 'none';
+  updateGoalLabels();
+}
+function updateGoalLabels(){
+  const loansOn = document.getElementById('loansEnabled').checked;
+  const emergOn = document.getElementById('emergEnabled').checked;
+  const houseOn = document.getElementById('houseEnabled').checked;
+  let g = 1;
+  document.getElementById('loan-section-label').textContent = loansOn ? `Goal ${g++} — Loans` : 'Loans (disabled)';
+  document.getElementById('emerg-section-label').textContent = emergOn ? `Goal ${g++} — Emergency Fund` : 'Emergency Fund (disabled)';
+  document.getElementById('house-section-label').textContent = houseOn ? `Goal ${g} — House Down Payment` : 'House Down Payment (disabled)';
+}
+
+// ── LOAN cards ─────────────────────────────────────────────────────
+function addLoan(){
+  loans.push({id:++loanId, bal:'', rate:'', minPay:'', sav:''});
+  renderLoans();
+  saveState();
+}
+function removeLoan(id){
+  saveLoanFields();
+  loans = loans.filter(l=>l.id!==id);
+  renderLoans();
+  saveState();
+}
+function saveLoanFields(){
+  loans.forEach(l=>{
+    l.bal   = v(`l${l.id}_bal`);
+    l.rate  = v(`l${l.id}_rate`);
+    l.minPay= v(`l${l.id}_min`);
+    l.sav   = v(`l${l.id}_sav`);
   });
-  calculate();
 }
-function updateRow(id,val){const r=rows.find(r=>r.id===id);if(r)r.amount=val;calculate();}
-function addRow(){rows.push({id:nextId++,amount:''});renderRows();}
-function removeRow(id){if(rows.length<=1)return;rows=rows.filter(r=>r.id!==id);renderRows();}
+function renderLoans(){
+  const el=document.getElementById('loan-list');
+  el.innerHTML='';
+  if(!loans.length){ el.innerHTML='<p class="empty-msg">No loans added — click "+ Add loan" above</p>'; return; }
+  loans.forEach((l,i)=>{
+    const d=document.createElement('div');
+    d.className='item-card loan-card';
+    d.innerHTML=`
+      <div class="card-header">
+        <span class="card-title">Loan ${i+1}</span>
+        <button class="remove-card-btn" onclick="removeLoan(${l.id})" title="Remove">&#x2715;</button>
+      </div>
+      <div class="input-grid g-2">
+        <div class="field"><label>Balance ($)</label>
+          <input type="number" id="l${l.id}_bal" value="${l.bal}" placeholder="e.g. 8500" step="0.01" min="0" class="inp" oninput="loanField(${l.id},'bal',this.value)"></div>
+        <div class="field"><label>Annual interest rate (%)</label>
+          <input type="number" id="l${l.id}_rate" value="${l.rate}" placeholder="e.g. 5.5" step="0.01" min="0" class="inp" oninput="loanField(${l.id},'rate',this.value)"></div>
+        <div class="field"><label>Required monthly payment ($)</label>
+          <input type="number" id="l${l.id}_min" value="${l.minPay}" placeholder="e.g. 200" step="0.01" min="0" class="inp" oninput="loanField(${l.id},'minPay',this.value)"></div>
+        <div class="field"><label>Savings already set aside ($)</label>
+          <input type="number" id="l${l.id}_sav" value="${l.sav}" placeholder="e.g. 500" step="0.01" min="0" class="inp" oninput="loanField(${l.id},'sav',this.value)"></div>
+      </div>`;
+    el.appendChild(d);
+  });
+}
+function loanField(id, key, val){
+  const l=loans.find(l=>l.id===id);
+  if(l){ l[key]=val; saveState(); }
+}
 
-function calculate(){
-  const balance   = parseFloat(document.getElementById('balance').value)||0;
-  const loanRate  = parseFloat(document.getElementById('loanRate').value)||0;
-  const savings   = parseFloat(document.getElementById('savings').value)||0;
-  const minPay    = parseFloat(document.getElementById('minPayment').value)||0;
-  const emergGoal = parseFloat(document.getElementById('emergGoal').value)||25000;
-  const apy       = parseFloat(document.getElementById('apy').value)||0;
-  const resultArea= document.getElementById('result-area');
-  const monthlyRate= loanRate/100/12;
+// ── CONTRIBUTION cards ─────────────────────────────────────────────
+const FREQ_LABELS={monthly:'Monthly',biweekly:'Bi-weekly',quarterly:'Quarterly',annually:'Annually',oneoff:'One-time'};
+const FREQ_CLASS={monthly:'freq-monthly',biweekly:'freq-biweekly',quarterly:'freq-quarterly',annually:'freq-annually',oneoff:'freq-oneoff'};
 
-  if(!balance){
-    resultArea.innerHTML='<p style="font-size:13px;color:#888;text-align:center;margin-top:.5rem">Enter your loan balance to see your full timeline.</p>';
-    return;
-  }
+function addContrib(){
+  contribs.push({id:++contribId, freq:'monthly', amt:'', start:'', end:'', day:''});
+  renderContribs();
+  saveState();
+}
+function removeContrib(id){
+  saveContribFields();
+  contribs = contribs.filter(c=>c.id!==id);
+  renderContribs();
+  saveState();
+}
+function saveContribFields(){
+  contribs.forEach(c=>{
+    c.amt   = v(`c${c.id}_amt`);
+    c.start = v(`c${c.id}_start`);
+    c.end   = v(`c${c.id}_end`);
+    c.day   = v(`c${c.id}_day`);
+  });
+}
+function contribField(id, key, val){
+  const c=contribs.find(c=>c.id===id);
+  if(c){ c[key]=val; saveState(); }
+}
+function changeFreq(id, val){
+  saveContribFields();
+  const c=contribs.find(c=>c.id===id);
+  if(c){ c.freq=val; }
+  renderContribs();
+  saveState();
+}
 
-  let loanRemaining = balance - savings;
-  let loanMonths=0, loanInterest=0, loanPayments=0, leftover=0;
-  let loanPaidDate='Now';
+function renderContribs(){
+  const el=document.getElementById('contrib-list');
+  el.innerHTML='';
+  if(!contribs.length){ el.innerHTML='<p class="empty-msg">No contributions added — click "+ Add contribution" above</p>'; return; }
+  contribs.forEach((c,i)=>{
+    const freq=c.freq||'monthly';
+    const isOneoff=freq==='oneoff';
+    const d=document.createElement('div');
+    d.className='item-card contrib-card';
+    d.innerHTML=`
+      <div class="card-header">
+        <span class="card-title">Contribution ${i+1}</span>
+        <span class="freq-badge ${FREQ_CLASS[freq]}">${FREQ_LABELS[freq]}</span>
+        <button class="remove-card-btn" onclick="removeContrib(${c.id})" title="Remove">&#x2715;</button>
+      </div>
+      <div class="input-grid g-2">
+        <div class="field"><label>Amount ($)</label>
+          <input type="number" id="c${c.id}_amt" value="${c.amt}" placeholder="e.g. 2000" step="0.01" min="0" class="inp" oninput="contribField(${c.id},'amt',this.value)"></div>
+        <div class="field"><label>Frequency</label>
+          <select id="c${c.id}_freq" class="inp" onchange="changeFreq(${c.id},this.value)">
+            <option value="monthly"   ${freq==='monthly'   ?'selected':''}>Monthly</option>
+            <option value="biweekly"  ${freq==='biweekly'  ?'selected':''}>Bi-weekly</option>
+            <option value="quarterly" ${freq==='quarterly' ?'selected':''}>Quarterly</option>
+            <option value="annually"  ${freq==='annually'  ?'selected':''}>Annually</option>
+            <option value="oneoff"    ${freq==='oneoff'    ?'selected':''}>One-time</option>
+          </select></div>
+        ${isOneoff
+          ? `<div class="field" style="grid-column:1/-1"><label>Date</label>
+              <input type="date" id="c${c.id}_day" value="${c.day}" class="inp" oninput="contribField(${c.id},'day',this.value)"></div>`
+          : `<div class="field"><label>Start month</label>
+              <input type="month" id="c${c.id}_start" value="${c.start}" class="inp" oninput="contribField(${c.id},'start',this.value)"></div>
+             <div class="field"><label>Day of month (1–28)</label>
+              <input type="number" id="c${c.id}_day" value="${c.day}" placeholder="e.g. 15" min="1" max="28" class="inp" oninput="contribField(${c.id},'day',this.value)"></div>
+             <div class="field"><label>End month (optional)</label>
+              <input type="month" id="c${c.id}_end" value="${c.end}" class="inp" oninput="contribField(${c.id},'end',this.value)"></div>`
+        }
+      </div>`;
+    el.appendChild(d);
+  });
+}
 
-  if(loanRemaining<=0){
-    leftover=Math.abs(loanRemaining);
-    loanPaidDate='Now (savings cover balance)';
-  } else {
-    const max=1200;
-    while(loanRemaining>0.005&&loanMonths<max){
-      const interest=loanRemaining*monthlyRate;
-      loanRemaining+=interest; loanInterest+=interest;
-      const budget=getBudget(loanMonths);
-      const totalPayment=Math.max(budget,minPay);
-      if(totalPayment<=0){
-        resultArea.innerHTML=`<div class="warning">Payments aren't enough to pay off the loan. Increase your monthly budget.</div>`;
-        return;
-      }
-      if(totalPayment>=loanRemaining){
-        leftover=totalPayment-loanRemaining;
-        loanPayments+=loanRemaining;
-        loanRemaining=0;
-        loanMonths++;
-        break;
-      }
-      loanRemaining-=totalPayment;
-      loanPayments+=totalPayment;
-      loanMonths++;
-    }
-    if(loanRemaining>0.005){
-      resultArea.innerHTML=`<div class="warning">Payments aren't enough to pay off the loan. Increase your monthly budget.</div>`;
+// ── Build monthly cash-flow map ────────────────────────────────────
+function buildCashMap(simStart, simEnd){
+  const map=new Map();
+  const add=(d,amt)=>{
+    if(!d||d<simStart||(simEnd&&d>simEnd)) return;
+    const k=monthKey(d);
+    map.set(k,(map.get(k)||0)+amt);
+  };
+
+  contribs.forEach(c=>{
+    const amt=parseFloat(c.amt)||0;
+    if(!amt) return;
+    const freq=c.freq||'monthly';
+
+    if(freq==='oneoff'){
+      if(!c.day) return;
+      const d=parseYMD(c.day);
+      if(d) add(new Date(d.getFullYear(),d.getMonth(),1), amt);
       return;
     }
-    loanPaidDate=fmtDate(getMonthDate(Math.max(0,loanMonths-1)));
+
+    const startD=parseYM(c.start);
+    if(!startD) return;
+    const endD=c.end?parseYM(c.end):null;
+
+    const step={monthly:1,biweekly:1,quarterly:3,annually:12}[freq]||1;
+    const multiplier=freq==='biweekly'?2:1; // biweekly = 2 deposits/month
+
+    let cur=new Date(startD);
+    while((!endD||cur<=endD)&&(!simEnd||cur<=simEnd)){
+      add(new Date(cur), amt*multiplier);
+      cur=addMonths(cur,step);
+    }
+  });
+
+  return map;
+}
+
+// ── Main calculate ─────────────────────────────────────────────────
+function calculate(){
+  const resultArea=document.getElementById('result-area');
+  resultArea.innerHTML='';
+
+  // Save any unsaved field edits
+  saveLoanFields();
+  saveContribFields();
+
+  const loansOn   = document.getElementById('loansEnabled').checked;
+  const emergOn   = document.getElementById('emergEnabled').checked;
+  const houseOn   = document.getElementById('houseEnabled').checked;
+  const hysaOn    = document.getElementById('hysaEnabled').checked;
+  const apy       = hysaOn ? (parseFloat(v('apy'))||0) : 0;
+  const emergGoal = emergOn ? (parseFloat(v('emergGoal'))||0) : 0;
+  const houseGoal = houseOn ? (parseFloat(v('houseGoal'))||0) : 0;
+
+  // At least one goal must be enabled
+  if(!loansOn && !emergOn && !houseOn){
+    resultArea.innerHTML='<div class="warning">Enable at least one goal to calculate your timeline.</div>'; return;
+  }
+  if(!contribs.length){ resultArea.innerHTML='<div class="warning">Add at least one contribution rule.</div>'; return; }
+
+  const loanData = loansOn ? loans.map(l=>({
+    balance : parseFloat(l.bal)||0,
+    rate    : parseFloat(l.rate)||0,
+    minPay  : parseFloat(l.minPay)||0,
+    savings : parseFloat(l.sav)||0,
+  })) : [];
+
+  if(loansOn && (!loanData.length || loanData.every(l=>l.balance<=0))){
+    resultArea.innerHTML='<div class="warning">Enter a balance for at least one loan, or disable the Loans goal.</div>'; return;
+  }
+  if(emergOn && emergGoal <= 0){
+    resultArea.innerHTML='<div class="warning">Enter an emergency fund target, or disable the Emergency Fund goal.</div>'; return;
   }
 
-  let hysaBal = leftover;
-  let emergMonths=0, emergInterest=0;
-  let emergReachedDate=null, emergReachedBal=0;
+  // Simulation start = earliest contribution start
+  let simStart=null;
+  contribs.forEach(c=>{
+    const d=c.freq==='oneoff'?(c.day?(()=>{const[y,m]=c.day.split('-').map(Number);return new Date(y,m-1,1);})():null):parseYM(c.start);
+    if(d&&(!simStart||d<simStart)) simStart=new Date(d.getFullYear(),d.getMonth(),1);
+  });
+  if(!simStart){ resultArea.innerHTML='<div class="warning">Set a start date on at least one contribution.</div>'; return; }
 
-  if(leftover>0&&loanMonths>0){
-    const d=getMonthDate(loanMonths-1);
-    const int=hysaInt(hysaBal,apy,d.getFullYear(),d.getMonth());
-    hysaBal+=int; emergInterest+=int;
-  }
+  const simEnd=addMonths(simStart,600);
+  const cashMap=buildCashMap(simStart,simEnd);
 
-  if(hysaBal>=emergGoal){
-    emergReachedDate=loanPaidDate;
-    emergReachedBal=hysaBal;
-    emergMonths=0;
-  } else {
-    const max=1200;
-    while(hysaBal<emergGoal&&emergMonths<max){
-      const absIdx=loanMonths+emergMonths;
-      const budget=getBudget(absIdx);
-      hysaBal+=budget;
-      const d=getMonthDate(absIdx);
-      const int=hysaInt(hysaBal,apy,d.getFullYear(),d.getMonth());
-      hysaBal+=int; emergInterest+=int;
-      emergMonths++;
-      if(hysaBal>=emergGoal){
-        emergReachedDate=fmtDate(d);
-        emergReachedBal=hysaBal;
-        break;
+  // Seed HYSA with any loan savings overshoot
+  let remainingBalances=loanData.map(l=>({
+    rem    : Math.max(0,l.balance-l.savings),
+    leftover:Math.max(0,l.savings-l.balance),
+    rate   : l.rate,
+    minPay : l.minPay,
+    balance: l.balance,
+    savings: l.savings,
+  }));
+  let hysaBal=remainingBalances.reduce((s,l)=>s+l.leftover,0);
+  let totalLoanInterest=0, totalLoanPayments=0;
+  const totalSavingsApplied=loanData.reduce((s,l)=>s+Math.min(l.savings,l.balance),0);
+
+  let loanPhaseEnd=null, loanMonthCount=0;
+  let emergPhaseEnd=null, emergMonthCount=0, emergInterest=0, emergReachedBal=0, emergExcess=0;
+  let houseInterest=0, houseMonthCount=0, houseFinalBal=0, houseFinalDate=null, houseGoalDate=null, houseGoalMonthCount=0, houseGoalBal=0;
+  let emergDone=!emergOn || !emergGoal;
+  let loansDone=!loansOn || loanData.every(l=>l.balance<=0); // skip if loans disabled
+  if(loansDone && !loansOn) loanPhaseEnd=null;
+
+  let cur=new Date(simStart);
+  let monthIdx=0;
+  const MAX=600;
+
+  let lastCashMonth=simStart;
+  cashMap.forEach((_,k)=>{
+    const y=Math.floor(k/12), m=k%12;
+    const d=new Date(y,m,1);
+    if(d>lastCashMonth) lastCashMonth=d;
+  });
+
+  while(monthIdx<MAX){
+    const k=monthKey(cur);
+    let cashLeft=cashMap.get(k)||0;
+
+    // ── Phase 1: Loans ──────────────────────────────────────────
+    if(!loansDone){
+      remainingBalances.forEach(l=>{
+        if(l.rem<=0) return;
+        const interest=l.rem*(l.rate/100/12);
+        l.rem+=interest; totalLoanInterest+=interest;
+        const pay=Math.min(l.minPay, l.rem);
+        l.rem=Math.max(0,l.rem-pay);
+        totalLoanPayments+=pay;
+        cashLeft=Math.max(0,cashLeft-pay);
+      });
+      remainingBalances.forEach(l=>{
+        if(l.rem<=0||cashLeft<=0) return;
+        const pay=Math.min(cashLeft,l.rem);
+        l.rem=Math.max(0,l.rem-pay);
+        totalLoanPayments+=pay;
+        cashLeft-=pay;
+      });
+      if(remainingBalances.every(l=>l.rem<=0.005)){
+        loansDone=true;
+        loanPhaseEnd=fmtDate(cur);
+        loanMonthCount=monthIdx+1;
+        hysaBal+=Math.max(0,cashLeft);
+        cashLeft=0;
       }
     }
-  }
 
-  if(!emergReachedDate){
-    resultArea.innerHTML=`<div class="warning">Can't reach emergency fund goal. Try increasing your monthly budget.</div>`;
-    return;
-  }
-
-  const totalBudgetRows=rows.length;
-  const hysaPhaseStartAbs=loanMonths;
-  const emergEndAbs=hysaPhaseStartAbs+emergMonths;
-  let houseMonths=0, houseInterest=0;
-  let houseBal=emergReachedBal;
-  let houseFinalDate=emergReachedDate;
-  const remainingRowCount=totalBudgetRows-emergEndAbs;
-
-  if(remainingRowCount>0){
-    for(let i=0;i<remainingRowCount;i++){
-      const absIdx=emergEndAbs+i;
-      const budget=getBudget(absIdx);
-      houseBal+=budget;
-      const d=getMonthDate(absIdx);
-      const int=hysaInt(houseBal,apy,d.getFullYear(),d.getMonth());
-      houseBal+=int; houseInterest+=int;
-      houseMonths++;
-      houseFinalDate=fmtDate(d);
+    // ── Phase 2: Emergency fund ─────────────────────────────────
+    if(loansDone && !emergDone){
+      hysaBal+=cashLeft; cashLeft=0;
+      const int=hysaInt(hysaBal,apy,cur.getFullYear(),cur.getMonth());
+      hysaBal+=int; emergInterest+=int;
+      emergMonthCount++;
+      if(hysaBal>=emergGoal){
+        emergDone=true;
+        emergPhaseEnd=fmtDate(cur);
+        emergReachedBal=hysaBal;
+        emergExcess=hysaBal-emergGoal;
+        hysaBal=emergExcess;
+      }
     }
+
+    // ── Phase 3: Down payment ───────────────────────────────────
+    if(loansDone && emergDone && houseOn){
+      hysaBal+=cashLeft; cashLeft=0;
+      const int=hysaInt(hysaBal,apy,cur.getFullYear(),cur.getMonth());
+      hysaBal+=int; houseInterest+=int;
+      houseFinalBal=hysaBal;
+      houseFinalDate=fmtDate(cur);
+      houseMonthCount++;
+      if(houseGoal>0 && hysaBal>=houseGoal && !houseGoalDate){
+        houseGoalDate=fmtDate(cur);
+        houseGoalMonthCount=houseMonthCount;
+        houseGoalBal=hysaBal;
+      }
+    }
+
+    monthIdx++;
+    cur=addMonths(cur,1);
+    // Stop when all enabled goals are done or contributions exhausted
+    if(loansDone && emergDone){
+      if(houseOn && houseGoal>0 && houseGoalDate) break;
+      if(!houseOn || cur>lastCashMonth) break;
+    }
+    if(monthIdx>=MAX) break;
   }
 
-  const totalMonths=loanMonths+emergMonths+(houseMonths||1);
-  const lp=Math.max(2,Math.round(loanMonths/totalMonths*100));
-  const ep=Math.max(2,Math.round(emergMonths/totalMonths*100));
-  const hp=Math.max(2,100-lp-ep);
+  if(loansOn && !loansDone){ resultArea.innerHTML='<div class="warning">Contributions aren\'t enough to pay off the loans within 50 years. Increase contribution amounts or required payments.</div>'; return; }
+  if(emergOn && emergGoal>0 && !emergDone){ resultArea.innerHTML='<div class="warning">Emergency fund goal not reached within the contribution window. Add more contributions or extend their end dates.</div>'; return; }
 
-  resultArea.innerHTML=`
-    <div class="timeline">
-      <div class="tl-seg tl-loan" style="flex:${lp}">${loanMonths>0?`Loan · ${loanMonths}mo`:''}</div>
-      <div class="tl-seg tl-emerg" style="flex:${ep}">E-Fund · ${emergMonths}mo</div>
-      <div class="tl-seg tl-house" style="flex:${hp}">Down pmt · ${houseMonths}mo</div>
-    </div>
-    <div class="phase-block phase-loan">
-      <p class="phase-title pt-loan">&#x2713; Goal 1 — loan paid off</p>
-      <p class="phase-date">${loanPaidDate}</p>
-      <p class="phase-sub">${loanMonths} payment${loanMonths===1?'':'s'}</p>
+  // ── Dynamic goal numbering for results ──────────────────────────
+  const showLoans=loansOn && loanData.some(l=>l.balance>0);
+  const showEmerg=emergOn && emergGoal>0;
+  const showHouse=houseOn;
+  let gn=1;
+  const loanGn  = showLoans ? gn++ : null;
+  const emergGn = showEmerg ? gn++ : null;
+  const houseGn = gn;
+
+  // Build timeline segments
+  const segs=[];
+  if(showLoans) segs.push({cls:'tl-loan',label:'Loan',count:loanMonthCount});
+  if(showEmerg) segs.push({cls:'tl-emerg',label:'E-Fund',count:emergMonthCount});
+  if(showHouse) segs.push({cls:'tl-house',label:'Down Pmt',count:houseMonthCount||1});
+  const totalM=segs.reduce((s,x)=>s+x.count,0)||1;
+  let usedPct=0;
+  segs.forEach((seg,i)=>{
+    seg.pct=i===segs.length-1?Math.max(2,100-usedPct):Math.max(2,Math.round(seg.count/totalM*100));
+    usedPct+=seg.pct;
+  });
+
+  let html=`<div class="timeline">
+    ${segs.map(s=>`<div class="tl-seg ${s.cls}" style="flex:${s.pct}">${s.label}<br>${s.count}mo</div>`).join('')}
+  </div>`;
+
+  if(showLoans){
+    html+=`<div class="phase-block phase-loan">
+      <p class="phase-title pt-loan">&#10003; Goal ${loanGn} — All loans paid off</p>
+      <p class="phase-date">${loanPhaseEnd}</p>
+      <p class="phase-sub">${loanMonthCount} month${loanMonthCount===1?'':'s'}</p>
       <div class="stat-row">
-        <div class="stat"><div class="stat-val">$${fmt(savings)}</div><div class="stat-lbl">Savings applied</div></div>
-        <div class="stat"><div class="stat-val">$${fmt(loanInterest)}</div><div class="stat-lbl">Loan interest paid</div></div>
-        <div class="stat"><div class="stat-val">$${fmt(loanPayments)}</div><div class="stat-lbl">Payments made</div></div>
-        ${leftover>0?`<div class="stat"><div class="stat-val">$${fmt(leftover)}</div><div class="stat-lbl">Rolled to HYSA</div></div>`:''}
+        <div class="stat"><div class="stat-val">$${fmt(totalSavingsApplied)}</div><div class="stat-lbl">Savings applied</div></div>
+        <div class="stat"><div class="stat-val">$${fmt(totalLoanInterest)}</div><div class="stat-lbl">Total interest paid</div></div>
+        <div class="stat"><div class="stat-val">$${fmt(totalLoanPayments)}</div><div class="stat-lbl">Total payments made</div></div>
       </div>
-    </div>
-    <div class="phase-block phase-emerg">
-      <p class="phase-title pt-emerg">&#x2713; Goal 2 — $${fmt(emergGoal)} emergency fund reached</p>
-      <p class="phase-date">${emergReachedDate}</p>
-      <p class="phase-sub">${emergMonths} month${emergMonths===1?'':'s'} of saving after loan payoff</p>
+    </div>`;
+  }
+
+  if(showEmerg){
+    html+=`<div class="phase-block phase-emerg">
+      <p class="phase-title pt-emerg">&#10003; Goal ${emergGn} — $${fmt(emergGoal)} emergency fund reached</p>
+      <p class="phase-date">${emergPhaseEnd}</p>
+      <p class="phase-sub">${emergMonthCount} month${emergMonthCount===1?'':'s'} of saving${showLoans?' after loan payoff':''}</p>
       <div class="stat-row">
         <div class="stat"><div class="stat-val">$${fmt(emergReachedBal)}</div><div class="stat-lbl">Balance when goal hit</div></div>
         <div class="stat"><div class="stat-val">$${fmt(emergInterest)}</div><div class="stat-lbl">HYSA interest earned</div></div>
         <div class="stat"><div class="stat-val">${apy?apy.toFixed(2)+'%':'—'} APY</div><div class="stat-lbl">Daily compounding</div></div>
       </div>
-    </div>
-    <div class="phase-block phase-house">
-      <p class="phase-title pt-house">&#x2302; Goal 3 — house down payment</p>
-      <p class="phase-date">$${fmt(houseBal)}</p>
-      <p class="phase-sub">${houseMonths>0?`As of ${houseFinalDate} · ${houseMonths} month${houseMonths===1?'':'s'} of contributions past Goal 2`:`No additional months added yet — keep adding budget rows to grow this`}</p>
+    </div>`;
+  }
+
+  // Goal 3 — two layouts: with target (date-first like G1/G2) vs without (balance-first)
+  if(showHouse && houseGoal>0){
+    const hitIt = !!houseGoalDate;
+    html+=`<div class="phase-block phase-house">
+      <p class="phase-title pt-house">&#8962; Goal ${houseGn} — $${fmt(houseGoal)} down payment${hitIt?' reached':' (not yet reached)'}</p>
+      <p class="phase-date">${hitIt ? houseGoalDate : '—'}</p>
+      <p class="phase-sub">${hitIt
+        ? `${houseGoalMonthCount} month${houseGoalMonthCount===1?'':'s'} of saving${showEmerg?' after emergency fund':showLoans?' after loan payoff':''}`
+        : `Target not reached within your planned contributions`
+      }</p>
       <div class="stat-row">
-        <div class="stat"><div class="stat-val">$${fmt(emergReachedBal)}</div><div class="stat-lbl">Carried over from Goal 2</div></div>
-        <div class="stat"><div class="stat-val">$${fmt(houseInterest)}</div><div class="stat-lbl">Interest earned (Goal 3)</div></div>
+        <div class="stat"><div class="stat-val">$${fmt(hitIt?houseGoalBal:houseFinalBal)}</div><div class="stat-lbl">Balance when goal hit</div></div>
+        <div class="stat"><div class="stat-val">$${fmt(houseInterest)}</div><div class="stat-lbl">HYSA interest earned</div></div>
+        ${showEmerg&&emergExcess>0?`<div class="stat"><div class="stat-val">$${fmt(emergExcess)}</div><div class="stat-lbl">Excess from E-Fund</div></div>`:''}
         <div class="stat"><div class="stat-val">$${fmt(emergInterest+houseInterest)}</div><div class="stat-lbl">Total HYSA interest</div></div>
       </div>
     </div>`;
+  } else if(showHouse) {
+    // No target — show accumulated balance
+    const g3bal  = houseFinalBal>0 ? houseFinalBal : hysaBal;
+    const g3date = houseFinalDate  || (showEmerg?emergPhaseEnd:loanPhaseEnd);
+    html+=`<div class="phase-block phase-house">
+      <p class="phase-title pt-house">&#8962; Goal ${houseGn} — House Down Payment</p>
+      <p class="phase-date">$${fmt(g3bal)}</p>
+      <p class="phase-sub">HYSA balance as of ${g3date} · ${houseMonthCount} month${houseMonthCount===1?'':'s'} of saving</p>
+      <div class="stat-row">
+        ${showEmerg&&emergExcess>0?`<div class="stat"><div class="stat-val">$${fmt(emergExcess)}</div><div class="stat-lbl">Excess from E-Fund</div></div>`:''}
+        <div class="stat"><div class="stat-val">$${fmt(houseInterest)}</div><div class="stat-lbl">HYSA interest earned</div></div>
+        <div class="stat"><div class="stat-val">$${fmt(emergInterest+houseInterest)}</div><div class="stat-lbl">Total HYSA interest</div></div>
+      </div>
+    </div>`;
+  }
+
+  resultArea.innerHTML=html;
+  resultArea.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
-const now=new Date();
-const next=new Date(now.getFullYear(),now.getMonth()+1,1);
-document.getElementById('startMonth').value=`${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,'0')}`;
-renderRows();
+// ── Persistence ────────────────────────────────────────────────────
+const STORAGE_KEY='finCalc_v2';
+
+function saveState(){
+  saveLoanFields();
+  saveContribFields();
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      loans, contribs, loanId, contribId,
+      loansEnabled: document.getElementById('loansEnabled').checked,
+      emergEnabled: document.getElementById('emergEnabled').checked,
+      houseEnabled: document.getElementById('houseEnabled').checked,
+      hysaEnabled:  document.getElementById('hysaEnabled').checked,
+      emergGoal: v('emergGoal'),
+      houseGoal: v('houseGoal'),
+      apy:       v('apy'),
+    }));
+  } catch(e){}
+}
+
+function loadState(){
+  try {
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    const s=JSON.parse(raw);
+    loans     = s.loans     || [];
+    contribs  = s.contribs  || [];
+    loanId    = s.loanId    || 0;
+    contribId = s.contribId || 0;
+    if(s.loansEnabled!==undefined) document.getElementById('loansEnabled').checked=s.loansEnabled;
+    if(s.emergEnabled!==undefined) document.getElementById('emergEnabled').checked=s.emergEnabled;
+    if(s.houseEnabled!==undefined) document.getElementById('houseEnabled').checked=s.houseEnabled;
+    if(s.hysaEnabled !==undefined) document.getElementById('hysaEnabled').checked=s.hysaEnabled;
+    if(s.emergGoal) document.getElementById('emergGoal').value=s.emergGoal;
+    if(s.houseGoal) document.getElementById('houseGoal').value=s.houseGoal;
+    if(s.apy)       document.getElementById('apy').value=s.apy;
+    toggleGoalNumbers();
+    toggleHysa();
+  } catch(e){}
+}
+
+function clearSaved(){
+  if(confirm('Clear all saved data and reset the calculator?')){
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
+  }
+}
+
+// ── Init ───────────────────────────────────────────────────────────
+loadState();
+renderLoans();
+renderContribs();
+updateGoalLabels();
 </script>
 </body>
 </html>
