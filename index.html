@@ -92,6 +92,18 @@ input:checked+.slider:before{transform:translateX(16px)}
     <p>Set your goals, plan your contributions, and see your full financial timeline. · <button onclick="clearSaved()" style="background:none;border:none;color:#94A3B8;cursor:pointer;font-size:13px;padding:0;text-decoration:underline">Clear saved data</button></p>
   </div>
 
+  <!-- CONTRIBUTIONS -->
+  <div class="section-wrap">
+    <div class="section-head">
+      <span class="section-label">Contributions</span>
+      <button class="section-add-btn" onclick="addContrib()">+ Add contribution</button>
+    </div>
+    <p style="font-size:12px;color:#94A3B8;margin-bottom:.75rem">Each rule applies across all goals in sequence. Leftover cash after each goal rolls forward automatically.</p>
+    <div id="contrib-list"></div>
+  </div>
+
+  <hr class="divider">
+
   <!-- LOANS -->
   <div class="section-wrap">
     <div class="section-head">
@@ -107,18 +119,6 @@ input:checked+.slider:before{transform:translateX(16px)}
     <div id="loans-enabled-wrap">
       <div id="loan-list"></div>
     </div>
-  </div>
-
-  <hr class="divider">
-
-  <!-- CONTRIBUTIONS -->
-  <div class="section-wrap">
-    <div class="section-head">
-      <span class="section-label">Contributions</span>
-      <button class="section-add-btn" onclick="addContrib()">+ Add contribution</button>
-    </div>
-    <p style="font-size:12px;color:#94A3B8;margin-bottom:.75rem">Each rule applies across all goals in sequence. Leftover cash after each goal rolls forward automatically.</p>
-    <div id="contrib-list"></div>
   </div>
 
   <hr class="divider">
@@ -140,6 +140,30 @@ input:checked+.slider:before{transform:translateX(16px)}
             <input type="number" id="emergGoal" placeholder="e.g. 25000" step="100" min="0" class="inp" oninput="saveState()">
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- HOUSE DOWN PAYMENT -->
+  <div class="section-wrap">
+    <div class="section-head">
+      <span class="section-label" id="house-section-label">House Down Payment (disabled)</span>
+      <label class="toggle" title="Toggle house down payment goal">
+        <input type="checkbox" id="houseEnabled" onchange="toggleGoalNumbers();saveState()">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div id="house-enabled-wrap" style="display:none">
+      <div class="item-card goal-card">
+        <div class="input-grid g-2">
+          <div class="field">
+            <label>Savings target ($) <span style="font-weight:400;color:#94A3B8">(optional)</span></label>
+            <input type="number" id="houseGoal" placeholder="e.g. 60000" step="100" min="0" class="inp" oninput="saveState()">
+          </div>
+        </div>
+        <p class="hint">If you enter a target, the result will show when you reach it. Leave blank to simply track how much you've accumulated through your last contribution.</p>
       </div>
     </div>
   </div>
@@ -170,30 +194,6 @@ input:checked+.slider:before{transform:translateX(16px)}
           </div>
         </div>
         <p class="hint">Interest compounds daily and is credited on the last day of each month.</p>
-      </div>
-    </div>
-  </div>
-
-  <hr class="divider">
-
-  <!-- HOUSE DOWN PAYMENT -->
-  <div class="section-wrap">
-    <div class="section-head">
-      <span class="section-label" id="house-section-label">House Down Payment (disabled)</span>
-      <label class="toggle" title="Toggle house down payment goal">
-        <input type="checkbox" id="houseEnabled" onchange="toggleGoalNumbers();saveState()">
-        <span class="slider"></span>
-      </label>
-    </div>
-    <div id="house-enabled-wrap" style="display:none">
-      <div class="item-card goal-card">
-        <div class="input-grid g-2">
-          <div class="field">
-            <label>Savings target ($) <span style="font-weight:400;color:#94A3B8">(optional)</span></label>
-            <input type="number" id="houseGoal" placeholder="e.g. 60000" step="100" min="0" class="inp" oninput="saveState()">
-          </div>
-        </div>
-        <p class="hint">If you enter a target, the result will show when you reach it. Leave blank to simply track how much you've accumulated through your last contribution.</p>
       </div>
     </div>
   </div>
