@@ -504,6 +504,8 @@ function calculate(){
     const k=monthKey(cur);
     let cashLeft=cashMap.get(k)||0;
 
+    let loanJustDone=false, emergJustDone=false;
+
     // ── Phase 1: Loans ──────────────────────────────────────────
     if(!loansDone){
       remainingBalances.forEach(l=>{
@@ -524,6 +526,7 @@ function calculate(){
       });
       if(remainingBalances.every(l=>l.rem<=0.005)){
         loansDone=true;
+        loanJustDone=true;
         loanPhaseEnd=fmtDate(cur);
         loanMonthCount=monthIdx+1;
         hysaBal+=Math.max(0,cashLeft);
@@ -532,13 +535,14 @@ function calculate(){
     }
 
     // ── Phase 2: Emergency fund ─────────────────────────────────
-    if(loansDone && !emergDone){
+    if(loansDone && !loanJustDone && !emergDone){
       hysaBal+=cashLeft; cashLeft=0;
       const int=hysaInt(hysaBal,apy,cur.getFullYear(),cur.getMonth());
       hysaBal+=int; emergInterest+=int;
       emergMonthCount++;
       if(hysaBal>=emergGoal){
         emergDone=true;
+        emergJustDone=true;
         emergPhaseEnd=fmtDate(cur);
         emergReachedBal=hysaBal;
         emergExcess=hysaBal-emergGoal;
@@ -547,7 +551,7 @@ function calculate(){
     }
 
     // ── Phase 3: Down payment ───────────────────────────────────
-    if(loansDone && emergDone && houseOn){
+    if(loansDone && !loanJustDone && emergDone && !emergJustDone && houseOn){
       hysaBal+=cashLeft; cashLeft=0;
       const int=hysaInt(hysaBal,apy,cur.getFullYear(),cur.getMonth());
       hysaBal+=int; houseInterest+=int;
