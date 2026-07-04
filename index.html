@@ -259,7 +259,7 @@ function updateGoalLabels(){
 
 // ── LOAN cards ─────────────────────────────────────────────────────
 function addLoan(){
-  loans.push({id:++loanId, bal:'', rate:'', minPay:'', sav:''});
+  loans.push({id:++loanId, bal:'', rate:'', minPay:''});
   renderLoans();
   saveState();
 }
@@ -274,7 +274,6 @@ function saveLoanFields(){
     l.bal   = v(`l${l.id}_bal`);
     l.rate  = v(`l${l.id}_rate`);
     l.minPay= v(`l${l.id}_min`);
-    l.sav   = v(`l${l.id}_sav`);
   });
 }
 function renderLoans(){
@@ -296,8 +295,6 @@ function renderLoans(){
           <input type="number" id="l${l.id}_rate" value="${l.rate}" placeholder="e.g. 5.5" step="0.01" min="0" class="inp" oninput="loanField(${l.id},'rate',this.value)"></div>
         <div class="field"><label>Required monthly payment ($)</label>
           <input type="number" id="l${l.id}_min" value="${l.minPay}" placeholder="e.g. 200" step="0.01" min="0" class="inp" oninput="loanField(${l.id},'minPay',this.value)"></div>
-        <div class="field"><label>Savings already set aside ($)</label>
-          <input type="number" id="l${l.id}_sav" value="${l.sav}" placeholder="e.g. 500" step="0.01" min="0" class="inp" oninput="loanField(${l.id},'sav',this.value)"></div>
       </div>`;
     el.appendChild(d);
   });
@@ -373,8 +370,6 @@ function renderContribs(){
               <input type="date" id="c${c.id}_day" value="${c.day}" class="inp" oninput="contribField(${c.id},'day',this.value)"></div>`
           : `<div class="field"><label>Start month</label>
               <input type="month" id="c${c.id}_start" value="${c.start}" class="inp" oninput="contribField(${c.id},'start',this.value)"></div>
-             <div class="field"><label>Day of month (1–28)</label>
-              <input type="number" id="c${c.id}_day" value="${c.day}" placeholder="e.g. 15" min="1" max="28" class="inp" oninput="contribField(${c.id},'day',this.value)"></div>
              <div class="field"><label>End month (optional)</label>
               <input type="month" id="c${c.id}_end" value="${c.end}" class="inp" oninput="contribField(${c.id},'end',this.value)"></div>`
         }
@@ -409,7 +404,7 @@ function buildCashMap(simStart, simEnd){
     const endD=c.end?parseYM(c.end):null;
 
     const step={monthly:1,biweekly:1,quarterly:3,annually:12}[freq]||1;
-    const multiplier=freq==='biweekly'?2:1; // biweekly = 2 deposits/month
+    const multiplier=freq==='biweekly'?26/12:1; // 26 bi-weekly paychecks/year, not 24
 
     let cur=new Date(startD);
     while((!endD||cur<=endD)&&(!simEnd||cur<=simEnd)){
@@ -448,7 +443,6 @@ function calculate(){
     balance : parseFloat(l.bal)||0,
     rate    : parseFloat(l.rate)||0,
     minPay  : parseFloat(l.minPay)||0,
-    savings : parseFloat(l.sav)||0,
   })) : [];
 
   if(loansOn && (!loanData.length || loanData.every(l=>l.balance<=0))){
@@ -471,17 +465,14 @@ function calculate(){
 
   // Seed HYSA with any loan savings overshoot
   let remainingBalances=loanData.map(l=>({
-    rem    : Math.max(0,l.balance-l.savings),
-    leftover:Math.max(0,l.savings-l.balance),
+    rem    : l.balance,
     rate   : l.rate,
     minPay : l.minPay,
-    balance: l.balance,
-    savings: l.savings,
   }));
-  let hysaBal=remainingBalances.reduce((s,l)=>s+l.leftover,0);
+  let hysaBal=0;
   let totalLoanInterest=0, totalLoanPayments=0;
-  const totalSavingsApplied=loanData.reduce((s,l)=>s+Math.min(l.savings,l.balance),0);
 
+  let minCoverageWarning=false;
   let loanPhaseEnd=null, loanMonthCount=0;
   let emergPhaseEnd=null, emergMonthCount=0, emergInterest=0, emergReachedBal=0, emergExcess=0;
   let houseInterest=0, houseMonthCount=0, houseFinalBal=0, houseFinalDate=null, houseGoalDate=null, houseGoalMonthCount=0, houseGoalBal=0;
@@ -508,6 +499,8 @@ function calculate(){
 
     // ── Phase 1: Loans ──────────────────────────────────────────
     if(!loansDone){
+      const totalMin=remainingBalances.reduce((s,l)=>l.rem>0?s+Math.min(l.minPay,l.rem):s,0);
+      if(cashLeft<totalMin) minCoverageWarning=true;
       remainingBalances.forEach(l=>{
         if(l.rem<=0) return;
         const interest=l.rem*(l.rate/100/12);
@@ -529,7 +522,7 @@ function calculate(){
         loanJustDone=true;
         loanPhaseEnd=fmtDate(cur);
         loanMonthCount=monthIdx;
-        hysaBal+=Math.max(0,cashLeft);
+        hysaBal+=Math.max(0,cashLeft); // leftover seeds next phase; interest applies next month
         cashLeft=0;
       }
     }
@@ -609,7 +602,6 @@ function calculate(){
       <p class="phase-date">${loanPhaseEnd}</p>
       <p class="phase-sub">${loanMonthCount} month${loanMonthCount===1?'':'s'}</p>
       <div class="stat-row">
-        <div class="stat"><div class="stat-val">$${fmt(totalSavingsApplied)}</div><div class="stat-lbl">Savings applied</div></div>
         <div class="stat"><div class="stat-val">$${fmt(totalLoanInterest)}</div><div class="stat-lbl">Total interest paid</div></div>
         <div class="stat"><div class="stat-val">$${fmt(totalLoanPayments)}</div><div class="stat-lbl">Total payments made</div></div>
       </div>
@@ -662,6 +654,7 @@ function calculate(){
     </div>`;
   }
 
+  if(minCoverageWarning) html='<div class="warning">In some months your contributions didn\'t fully cover all minimum loan payments — results may be optimistic. Consider increasing your contribution amounts.</div>'+html;
   resultArea.innerHTML=html;
   resultArea.scrollIntoView({behavior:'smooth',block:'start'});
 }
