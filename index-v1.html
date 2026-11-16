@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Financial Goals Calculator</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f3; color: #1a1a1a; min-height: 100vh; padding: 2rem 1rem; }
+  .container { max-width: 700px; margin: 0 auto; }
+  h1 { font-size: 22px; font-weight: 500; margin-bottom: 1.5rem; }
+  .card { background: #fff; border: 0.5px solid rgba(0,0,0,0.12); border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1rem; }
+  .setup { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field label { font-size: 12px; color: #666; display: block; margin-bottom: 4px; }
+  .amount-input { width: 100%; padding: 6px 10px; border: 0.5px solid #bbb; border-radius: 8px; background: #fff; color: #1a1a1a; font-size: 14px; font-family: inherit; }
+  .amount-input:focus { outline: none; border-color: #888; box-shadow: 0 0 0 2px rgba(0,0,0,0.08); }
+  .hl-blue { border-color: #93c5fd !important; background: #eff6ff !important; }
+  .hl-green { border-color: #86efac !important; background: #f0fdf4 !important; }
+  .section-label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: .05em; margin: 0 0 10px; font-weight: 500; }
+  .row-grid { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .month-label { font-size: 13px; color: #666; white-space: nowrap; }
+  .remove-btn { background: none; border: none; cursor: pointer; color: #999; padding: 4px 6px; font-size: 18px; line-height: 1; border-radius: 6px; }
+  .remove-btn:hover { background: #f0f0f0; color: #333; }
+  .add-btn { background: none; border: 0.5px solid #bbb; border-radius: 8px; padding: 7px 14px; cursor: pointer; font-size: 13px; color: #666; display: flex; align-items: center; gap: 6px; margin-bottom: .75rem; font-family: inherit; }
+  .add-btn:hover { background: #f5f5f5; color: #333; }
+  .hint { font-size: 12px; color: #888; }
+  .timeline { display: flex; align-items: stretch; margin-bottom: 1rem; border-radius: 8px; overflow: hidden; border: 0.5px solid #ddd; min-height: 40px; }
+  .tl-seg { display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; padding: 8px 4px; text-align: center; min-width: 2px; }
+  .tl-loan { background: #dbeafe; color: #1e40af; }
+  .tl-emerg { background: #dcfce7; color: #166534; }
+  .tl-house { background: #fef9c3; color: #854d0e; }
+  .phase-block { border-radius: 12px; padding: 1.25rem; text-align: center; margin-bottom: .75rem; }
+  .phase-loan { background: #dbeafe; }
+  .phase-emerg { background: #dcfce7; }
+  .phase-house { background: #fef9c3; }
+  .phase-title { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .06em; margin: 0 0 4px; }
+  .pt-loan { color: #1e40af; }
+  .pt-emerg { color: #166534; }
+  .pt-house { color: #854d0e; }
+  .phase-date { font-size: 20px; font-weight: 500; color: #1a1a1a; margin: 0 0 3px; }
+  .phase-sub { font-size: 13px; color: #555; margin: 0 0 1rem; }
+  .stat-row { display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; }
+  .stat { text-align: center; }
+  .stat-val { font-size: 16px; font-weight: 500; color: #1a1a1a; }
+  .stat-lbl { font-size: 11px; color: #666; }
+  .warning { background: #fef9c3; border: 0.5px solid #fde047; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #854d0e; margin-bottom: .75rem; }
+  @media (max-width: 500px) { .setup { grid-template-columns: 1fr; } .stat-row { gap: 1rem; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Financial Goals Calculator</h1>
+
+  <div class="card">
+    <p class="section-label">Loan details</p>
+    <div class="setup">
+      <div class="field">
+        <label>Current balance ($)</label>
+        <input type="number" id="balance" placeholder="e.g. 5000" step="0.01" min="0" class="amount-input" oninput="calculate()">
+      </div>
+      <div class="field">
+        <label>Annual interest rate (%)</label>
+        <input type="number" id="loanRate" placeholder="e.g. 5.5" step="0.01" min="0" class="amount-input" oninput="calculate()">
+      </div>
+      <div class="field">
+        <label>Required monthly payment ($)</label>
+        <input type="number" id="minPayment" placeholder="e.g. 150" step="0.01" min="0" class="amount-input hl-blue" oninput="calculate()">
+      </div>
+      <div class="field">
+        <label>Savings already set aside ($)</label>
+        <input type="number" id="savings" value="671.27" step="0.01" min="0" class="amount-input" oninput="calculate()">
+      </div>
+      <div class="field">
+        <label>Start month</label>
+        <input type="month" id="startMonth" class="amount-input" oninput="renderRows()">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="section-label">HYSA — emergency fund &amp; down payment</p>
+    <div class="setup">
+      <div class="field">
+        <label>Emergency fund target ($)</label>
+        <input type="number" id="emergGoal" value="25000" step="100" min="0" class="amount-input hl-green" oninput="calculate()">
+      </div>
+      <div class="field">
+        <label>HYSA APY (%)</label>
+        <input type="number" id="apy" placeholder="e.g. 4.5" step="0.01" min="0" class="amount-input hl-green" oninput="calculate()">
+      </div>
+    </div>
+    <p class="hint" style="margin-top:8px">Interest compounds daily, credited on the last day of each month. After hitting the emergency fund target, all contributions and interest continue building your down payment.</p>
+  </div>
+
+  <div class="card">
+    <p class="section-label">Monthly budget</p>
+    <div id="payment-rows"></div>
+    <button class="add-btn" onclick="addRow()">+ Add another month</button>
+    <p class="hint">Total you can put toward goals each month. During the loan phase, required payment comes first; extra crushes the principal. After payoff, everything flows into the HYSA. Goal 3 shows your running balance for every month you add beyond Goal 2.</p>
+  </div>
+
+  <div id="result-area"></div>
+</div>
+
+<script>
+let rows = [{id:1,amount:''},{id:2,amount:''}];
+let nextId = 3;
+
+function getMonthDate(absIdx){
+  const sm=document.getElementById('startMonth').value;
+  const [y,m]=sm?sm.split('-').map(Number):[new Date().getFullYear(),new Date().getMonth()+2];
+  return new Date(y,m-1+absIdx,1);
+}
+function fmtDate(d){return d.toLocaleString('default',{month:'long',year:'numeric'});}
+function getMonthLabel(idx){return fmtDate(getMonthDate(idx));}
+function daysInMonth(y,m){return new Date(y,m+1,0).getDate();}
+function hysaInt(bal,apy,y,m){
+  if(!apy||bal<=0)return 0;
+  return bal*(Math.pow(1+apy/100/365,daysInMonth(y,m))-1);
+}
+function fmt(n){return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function getBudget(absIdx){
+  const b=rows.map(r=>parseFloat(r.amount)||0);
+  return absIdx<b.length?b[absIdx]:b[b.length-1]||0;
+}
+
+function renderRows(){
+  const c=document.getElementById('payment-rows');
+  c.innerHTML='';
+  rows.forEach((row,idx)=>{
+    const div=document.createElement('div');
+    div.className='row-grid';
+    div.innerHTML=`
+      <span class="month-label">${getMonthLabel(idx)}</span>
+      <input type="number" class="amount-input" placeholder="$0 total budget" value="${row.amount}" min="0" step="0.01" oninput="updateRow(${row.id},this.value)"/>
+      <button class="remove-btn" onclick="removeRow(${row.id})" aria-label="Remove month ${idx+1}">&times;</button>`;
+    c.appendChild(div);
+  });
+  calculate();
+}
+function updateRow(id,val){const r=rows.find(r=>r.id===id);if(r)r.amount=val;calculate();}
+function addRow(){rows.push({id:nextId++,amount:''});renderRows();}
+function removeRow(id){if(rows.length<=1)return;rows=rows.filter(r=>r.id!==id);renderRows();}
+
+function calculate(){
+  const balance   = parseFloat(document.getElementById('balance').value)||0;
+  const loanRate  = parseFloat(document.getElementById('loanRate').value)||0;
+  const savings   = parseFloat(document.getElementById('savings').value)||0;
+  const minPay    = parseFloat(document.getElementById('minPayment').value)||0;
+  const emergGoal = parseFloat(document.getElementById('emergGoal').value)||25000;
+  const apy       = parseFloat(document.getElementById('apy').value)||0;
+  const resultArea= document.getElementById('result-area');
+  const monthlyRate= loanRate/100/12;
+
+  if(!balance){
+    resultArea.innerHTML='<p style="font-size:13px;color:#888;text-align:center;margin-top:.5rem">Enter your loan balance to see your full timeline.</p>';
+    return;
+  }
+
+  let loanRemaining = balance - savings;
+  let loanMonths=0, loanInterest=0, loanPayments=0, leftover=0;
+  let loanPaidDate='Now';
+
+  if(loanRemaining<=0){
+    leftover=Math.abs(loanRemaining);
+    loanPaidDate='Now (savings cover balance)';
+  } else {
+    const max=1200;
+    while(loanRemaining>0.005&&loanMonths<max){
+      const interest=loanRemaining*monthlyRate;
+      loanRemaining+=interest; loanInterest+=interest;
+      const budget=getBudget(loanMonths);
+      const totalPayment=Math.max(budget,minPay);
+      if(totalPayment<=0){
+        resultArea.innerHTML=`<div class="warning">Payments aren't enough to pay off the loan. Increase your monthly budget.</div>`;
+        return;
+      }
+      if(totalPayment>=loanRemaining){
+        leftover=totalPayment-loanRemaining;
+        loanPayments+=loanRemaining;
+        loanRemaining=0;
+        loanMonths++;
+        break;
+      }
+      loanRemaining-=totalPayment;
+      loanPayments+=totalPayment;
+      loanMonths++;
+    }
+    if(loanRemaining>0.005){
+      resultArea.innerHTML=`<div class="warning">Payments aren't enough to pay off the loan. Increase your monthly budget.</div>`;
+      return;
+    }
+    loanPaidDate=fmtDate(getMonthDate(Math.max(0,loanMonths-1)));
+  }
+
+  let hysaBal = leftover;
+  let emergMonths=0, emergInterest=0;
+  let emergReachedDate=null, emergReachedBal=0;
+
+  if(leftover>0&&loanMonths>0){
+    const d=getMonthDate(loanMonths-1);
+    const int=hysaInt(hysaBal,apy,d.getFullYear(),d.getMonth());
+    hysaBal+=int; emergInterest+=int;
+  }
+
+  if(hysaBal>=emergGoal){
+    emergReachedDate=loanPaidDate;
+    emergReachedBal=hysaBal;
+    emergMonths=0;
+  } else {
+    const max=1200;
+    while(hysaBal<emergGoal&&emergMonths<max){
+      const absIdx=loanMonths+emergMonths;
+      const budget=getBudget(absIdx);
+      hysaBal+=budget;
+      const d=getMonthDate(absIdx);
+      const int=hysaInt(hysaBal,apy,d.getFullYear(),d.getMonth());
+      hysaBal+=int; emergInterest+=int;
+      emergMonths++;
+      if(hysaBal>=emergGoal){
+        emergReachedDate=fmtDate(d);
+        emergReachedBal=hysaBal;
+        break;
+      }
+    }
+  }
+
+  if(!emergReachedDate){
+    resultArea.innerHTML=`<div class="warning">Can't reach emergency fund goal. Try increasing your monthly budget.</div>`;
+    return;
+  }
+
+  const totalBudgetRows=rows.length;
+  const hysaPhaseStartAbs=loanMonths;
+  const emergEndAbs=hysaPhaseStartAbs+emergMonths;
+  let houseMonths=0, houseInterest=0;
+  let houseBal=emergReachedBal;
+  let houseFinalDate=emergReachedDate;
+  const remainingRowCount=totalBudgetRows-emergEndAbs;
+
+  if(remainingRowCount>0){
+    for(let i=0;i<remainingRowCount;i++){
+      const absIdx=emergEndAbs+i;
+      const budget=getBudget(absIdx);
+      houseBal+=budget;
+      const d=getMonthDate(absIdx);
+      const int=hysaInt(houseBal,apy,d.getFullYear(),d.getMonth());
+      houseBal+=int; houseInterest+=int;
+      houseMonths++;
+      houseFinalDate=fmtDate(d);
+    }
+  }
+
+  const totalMonths=loanMonths+emergMonths+(houseMonths||1);
+  const lp=Math.max(2,Math.round(loanMonths/totalMonths*100));
+  const ep=Math.max(2,Math.round(emergMonths/totalMonths*100));
+  const hp=Math.max(2,100-lp-ep);
+
+  resultArea.innerHTML=`
+    <div class="timeline">
+      <div class="tl-seg tl-loan" style="flex:${lp}">${loanMonths>0?`Loan · ${loanMonths}mo`:''}</div>
+      <div class="tl-seg tl-emerg" style="flex:${ep}">E-Fund · ${emergMonths}mo</div>
+      <div class="tl-seg tl-house" style="flex:${hp}">Down pmt · ${houseMonths}mo</div>
+    </div>
+    <div class="phase-block phase-loan">
+      <p class="phase-title pt-loan">&#x2713; Goal 1 — loan paid off</p>
+      <p class="phase-date">${loanPaidDate}</p>
+      <p class="phase-sub">${loanMonths} payment${loanMonths===1?'':'s'}</p>
+      <div class="stat-row">
+        <div class="stat"><div class="stat-val">$${fmt(savings)}</div><div class="stat-lbl">Savings applied</div></div>
+        <div class="stat"><div class="stat-val">$${fmt(loanInterest)}</div><div class="stat-lbl">Loan interest paid</div></div>
+        <div class="stat"><div class="stat-val">$${fmt(loanPayments)}</div><div class="stat-lbl">Payments made</div></div>
+        ${leftover>0?`<div class="stat"><div class="stat-val">$${fmt(leftover)}</div><div class="stat-lbl">Rolled to HYSA</div></div>`:''}
+      </div>
+    </div>
+    <div class="phase-block phase-emerg">
+      <p class="phase-title pt-emerg">&#x2713; Goal 2 — $${fmt(emergGoal)} emergency fund reached</p>
+      <p class="phase-date">${emergReachedDate}</p>
+      <p class="phase-sub">${emergMonths} month${emergMonths===1?'':'s'} of saving after loan payoff</p>
+      <div class="stat-row">
+        <div class="stat"><div class="stat-val">$${fmt(emergReachedBal)}</div><div class="stat-lbl">Balance when goal hit</div></div>
+        <div class="stat"><div class="stat-val">$${fmt(emergInterest)}</div><div class="stat-lbl">HYSA interest earned</div></div>
+        <div class="stat"><div class="stat-val">${apy?apy.toFixed(2)+'%':'—'} APY</div><div class="stat-lbl">Daily compounding</div></div>
+      </div>
+    </div>
+    <div class="phase-block phase-house">
+      <p class="phase-title pt-house">&#x2302; Goal 3 — house down payment</p>
+      <p class="phase-date">$${fmt(houseBal)}</p>
+      <p class="phase-sub">${houseMonths>0?`As of ${houseFinalDate} · ${houseMonths} month${houseMonths===1?'':'s'} of contributions past Goal 2`:`No additional months added yet — keep adding budget rows to grow this`}</p>
+      <div class="stat-row">
+        <div class="stat"><div class="stat-val">$${fmt(emergReachedBal)}</div><div class="stat-lbl">Carried over from Goal 2</div></div>
+        <div class="stat"><div class="stat-val">$${fmt(houseInterest)}</div><div class="stat-lbl">Interest earned (Goal 3)</div></div>
+        <div class="stat"><div class="stat-val">$${fmt(emergInterest+houseInterest)}</div><div class="stat-lbl">Total HYSA interest</div></div>
+      </div>
+    </div>`;
+}
+
+const now=new Date();
+const next=new Date(now.getFullYear(),now.getMonth()+1,1);
+document.getElementById('startMonth').value=`${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,'0')}`;
+renderRows();
+</script>
+</body>
+</html>
